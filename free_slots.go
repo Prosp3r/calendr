@@ -147,6 +147,7 @@ func flagg(ch chan bool) {
 	ch <- true
 }
 
+
 var timeMap = make(map[int64]int64)
 var timeSlice = make([]int64, 0)
 var freeSlotMap = make(map[int64]int64)
@@ -207,10 +208,14 @@ func main() {
 
 	go flagg(ch)
 	if <-ch == true {
+		// fmt.Printf("Start Date Converted: %v\n\n", StartDayTime.UTC())
+		// fmt.Printf("Start Date ConvertedUnix: %v\n\n", StartDayTime.Unix())
+		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", time.Unix(StartDayTime.Unix(), 0).UTC())
+		// fmt.Printf("Standard Start Date Converted: %v\n\n", timeToStandard(StartDayTime))
 		c := new(Calendar)
 		c.ReadIn(Sourcefile)
 	}
-
+	
 	fmt.Printf("Time Map: %v\n\n Time Slice: %v\n\n", timeMap, timeSlice)
 
 	//Remove edundant dates
