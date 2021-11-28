@@ -108,6 +108,7 @@ func flagg(ch chan bool) {
 			failOnError(er, "time.Parse startdate")
 			os.Exit(1)
 		}
+
 	} else {
 		ch <- false
 		fmt.Printf("Improperly entered startdate : %v\n\n", startdate)
@@ -126,7 +127,7 @@ func flagg(ch chan bool) {
 			failOnError(er, "time.Parse enddate")
 			os.Exit(1)
 		}
-		_ = timeToStandard(EndDayTime) //temp
+		// _ = timeToStandard(EndDayTime) //temp
 
 	} else {
 		ch <- false
@@ -146,23 +147,6 @@ func flagg(ch chan bool) {
 	ch <- true
 }
 
-func genTime() {
-	today := time.Now()
-
-	for i := 1; i < 6; i++ {
-		// h := 24*i
-		yesterday := today
-		tomorrow := today.Add(24 * time.Hour)
-		timeToStandard(tomorrow)
-		today = tomorrow
-		//
-		diff := today.Unix() - yesterday.Unix()
-		fmt.Printf("Difference %v\n", diff)
-		added := yesterday.Unix() + diff
-		fmt.Printf("\nYesterday: %v\nConverting to time.Time: %v\n", yesterday, time.Unix(added, 0))
-	}
-}
-
 var timeMap = make(map[int64]int64)
 var timeSlice = make([]int64, 0)
 var freeSlotMap = make(map[int64]int64)
@@ -170,7 +154,14 @@ var freeSlotSlice = make([]int64, 0)
 
 func getFreeSlots() {
 
-	fmt.Printf("Starting Free Slots..timeSlice : %v\n", timeSlice)
+	fmt.Println("Curent Calendar :")
+	for _, v := range timeSlice {
+		fmt.Printf("StartTime : %v\n", timeToStandard(time.Unix(v, 0)))
+		fmt.Printf("EndTime : %v\n\n", timeToStandard(time.Unix(timeMap[v], 0)))
+	}
+
+	fmt.Printf("Starting Free Slots..: %v\n", timeSlice)
+
 	var currentStartTime = StartDayTime.Unix()
 	currentEndTime := currentStartTime //start checking from the user defined start time
 
@@ -209,13 +200,6 @@ func getFreeSlots() {
 		}
 
 	}
-
-	// StartTimes(NSt) 					:= [02, 04, 08, 09, 15, 20]
-	// NextEndTimes(NEt) 				:= [03, 05, 12, 10, 17, 21]
-	//lastEndTime(LEt) := default(01)
-	/*
-	 if LastEnd > NextStart && LastEnd < NextEnd
-	*/
 }
 
 func main() {
@@ -226,8 +210,7 @@ func main() {
 		c := new(Calendar)
 		c.ReadIn(Sourcefile)
 	}
-	fmt.Printf("\n\nAuto generated time\n")
-	genTime()
+
 	fmt.Printf("Time Map: %v\n\n Time Slice: %v\n\n", timeMap, timeSlice)
 
 	//Remove edundant dates
@@ -237,13 +220,12 @@ func main() {
 		}
 	}
 	getFreeSlots()
-	
 
 	sort.Slice(freeSlotSlice, func(i, j int) bool { return freeSlotSlice[i] < freeSlotSlice[j] })
 	fmt.Println("Free Slots:")
 	for _, v := range freeSlotSlice {
-		fmt.Printf("StartTime : %v \n", timeToStandard(time.Unix(v, 0)))
-		fmt.Printf("EndTime : %v \n\n", timeToStandard(time.Unix(freeSlotMap[v], 0)))
+		fmt.Printf("StartTime : %v \n", timeToStandard(time.Unix(v, 0).UTC()))
+		fmt.Printf("EndTime : %v \n\n", timeToStandard(time.Unix(freeSlotMap[v], 0).UTC()))
 	}
 }
 
@@ -267,7 +249,7 @@ func (c *Calendar) ReadIn(sourcefile string) {
 	//append start daytime
 	startTimeU := StartDayTime.Unix()
 	mutex.Lock()
-	timeMap[startTimeU] = EndDayTime.Unix()
+	timeMap[startTimeU] = StartDayTime.Unix()
 	timeSlice = append(timeSlice, startTimeU)
 	mutex.Unlock()
 
