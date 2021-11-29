@@ -210,25 +210,18 @@ func main() {
 	sort.Slice(freeSlotSlice, func(i, j int) bool { return freeSlotSlice[i] < freeSlotSlice[j] })
 
 	var results []Result
-	p := fmt.Println
 	for _, v := range freeSlotSlice {
-
-		// fmt.Printf("StartTime : %v \n", timeToStandard(time.Unix(v, 0).UTC()))
-		// fmt.Printf("EndTime : %v \n\n", timeToStandard(time.Unix(freeSlotMap[v], 0).UTC()))
 		StartTime := timeToStandard(time.Unix(v, 0).UTC())
 		EndTime := timeToStandard(time.Unix(freeSlotMap[v], 0).UTC())
 		result := Result{
 			StartTime: StartTime,
 			EndTime:   EndTime,
 		}
-		// p(startTime)
-		// p(endTime)
 		results = append(results, result)
 	}
 	r, err := json.Marshal(results)
 	failOnError(err, "Failed marshalling result to json")
-	p(string(r))
-
+	fmt.Println(string(r))
 }
 
 //ReadIn - reads the list of meeting schedule into memory from the given sourcefile.
