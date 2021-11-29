@@ -1,9 +1,3 @@
-/*
-Free slots
-1. Read in the calendars to memory*
-2. Read in start and end times from prompt*
-3. scan meetings.
-*/
 package main
 
 import (
@@ -14,7 +8,6 @@ import (
 	"sort"
 	"sync"
 	"time"
-	// "github.com/sqs/goreturns/returns"
 )
 
 type Calendar struct {
@@ -26,6 +19,11 @@ type Meetings struct {
 	SartTime time.Time `json:"starttime"`
 	EndTime  time.Time `json:"endtime"`
 	Subject  string    `json:"subject"`
+}
+
+type Result struct {
+	StartTime string `json:"startTime"`
+	EndTime   string `endTime:"endTime"`
 }
 
 func failOnError(err error, contex string) {
@@ -60,13 +58,12 @@ Argumnts are:
 //DEFINE FLAGS
 var (
 	Sourcefile, startdate, enddate string
-	// h                              = flag.Bool("h", false, "Display usage guide")
-	StartDayTime time.Time
-	EndDayTime   time.Time
-	Cal          []Calendar
-	er           error
-	mutex        = &sync.Mutex{}
-	wg           sync.WaitGroup
+	StartDayTime                   time.Time
+	EndDayTime                     time.Time
+	Cal                            []Calendar
+	er                             error
+	mutex                          = &sync.Mutex{}
+	wg                             sync.WaitGroup
 )
 
 func flagg(ch chan bool) {
@@ -98,7 +95,6 @@ func flagg(ch chan bool) {
 	}
 
 	if len(startdate) > 8 {
-		//validate date entry
 		fmt.Printf("Start Date : %v\n\n", startdate)
 		dateLayout := "2006-01-02"
 
@@ -118,7 +114,6 @@ func flagg(ch chan bool) {
 	}
 
 	if len(enddate) > 8 {
-		//validate date entry
 		fmt.Printf("End Date : %v\n\n", enddate)
 		dateLayout := "2006-01-02"
 		EndDayTime, er = time.Parse(dateLayout, enddate)
@@ -127,7 +122,6 @@ func flagg(ch chan bool) {
 			failOnError(er, "time.Parse enddate")
 			os.Exit(1)
 		}
-		// _ = timeToStandard(EndDayTime) //temp
 
 	} else {
 		ch <- false
@@ -143,10 +137,8 @@ func flagg(ch chan bool) {
 		ch <- false
 		os.Exit(1)
 	}
-
 	ch <- true
 }
-
 
 var timeMap = make(map[int64]int64)
 var timeSlice = make([]int64, 0)
@@ -155,49 +147,37 @@ var freeSlotSlice = make([]int64, 0)
 
 func getFreeSlots() {
 
-	fmt.Println("Curent Calendar :")
-	for _, v := range timeSlice {
-		fmt.Printf("StartTime : %v\n", timeToStandard(time.Unix(v, 0)))
-		fmt.Printf("EndTime : %v\n\n", timeToStandard(time.Unix(timeMap[v], 0)))
-	}
-
-	fmt.Printf("Starting Free Slots..: %v\n", timeSlice)
-
 	var currentStartTime = StartDayTime.Unix()
-	currentEndTime := currentStartTime //start checking from the user defined start time
+	currentEndTime := currentStartTime
 
 	for x := 1; x <= len(timeSlice); x++ {
 
 		nextStartTime := timeSlice[x-1]
 		nextEndTime := timeMap[nextStartTime]
 
-		if nextStartTime > EndDayTime.Unix() {
-			//next time slot is not within time frame.
-			//end the loop and func
-			fmt.Printf("End of time- nextStartTime : %v - EndDayTime : %v \n", nextStartTime, EndDayTime.Unix())
-			fmt.Printf("End of time- nextStartTime : %v - EndDayTime : %v \n", time.Unix(nextStartTime, 0), time.Unix(EndDayTime.Unix(), 0))
-			return
+		if nextEndTime > EndDayTime.Unix() || nextStartTime > EndDayTime.Unix() {
+			break
 		}
 
 		if currentEndTime > nextStartTime && currentEndTime > nextEndTime {
-			// currentEndTime is currentEndTime //no chage
-			//continue
 			continue
 		}
 
 		if currentEndTime > nextStartTime && currentEndTime < nextEndTime {
-			//next end time is nextEndTime
-			//
 			currentEndTime = nextEndTime
 			continue
 		}
 
 		if currentEndTime < nextStartTime {
-			//free slot is nextStartTime - currentEndTime
-			//add to freeSlot slice
 			freeSlotSlice = append(freeSlotSlice, currentEndTime)
 			freeSlotMap[currentEndTime] = nextStartTime
 			currentEndTime = nextEndTime
+		}
+
+		if x == len(timeSlice) && currentEndTime < EndDayTime.Unix() {
+			freeSlotSlice = append(freeSlotSlice, currentEndTime)
+			freeSlotMap[currentEndTime] = EndDayTime.Unix()
+			currentEndTime = EndDayTime.Unix()
 		}
 
 	}
@@ -210,15 +190,16 @@ func main() {
 	if <-ch == true {
 		// fmt.Printf("Start Date Converted: %v\n\n", StartDayTime.UTC())
 		// fmt.Printf("Start Date ConvertedUnix: %v\n\n", StartDayTime.Unix())
-		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", time.Unix(StartDayTime.Unix(), 0).UTC())
+		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", time.Unix(StartDayTime.UTC().Unix(), 0).UTC())
+
+		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", timeToStandard(time.Unix(StartDayTime.Unix(), 0)))
 		// fmt.Printf("Standard Start Date Converted: %v\n\n", timeToStandard(StartDayTime))
+		// fmt.Printf("Standard Start Date Converted: %v\n\n", timeToStandard(StartDayTime.UTC()))
 		c := new(Calendar)
 		c.ReadIn(Sourcefile)
 	}
-	
-	fmt.Printf("Time Map: %v\n\n Time Slice: %v\n\n", timeMap, timeSlice)
 
-	//Remove edundant dates
+	//Remove redundant dates
 	for i, v := range timeSlice {
 		if v == StartDayTime.Unix() {
 			timeSlice = timeSlice[i:]
@@ -227,16 +208,31 @@ func main() {
 	getFreeSlots()
 
 	sort.Slice(freeSlotSlice, func(i, j int) bool { return freeSlotSlice[i] < freeSlotSlice[j] })
-	fmt.Println("Free Slots:")
+
+	var results []Result
+	p := fmt.Println
 	for _, v := range freeSlotSlice {
-		fmt.Printf("StartTime : %v \n", timeToStandard(time.Unix(v, 0).UTC()))
-		fmt.Printf("EndTime : %v \n\n", timeToStandard(time.Unix(freeSlotMap[v], 0).UTC()))
+
+		// fmt.Printf("StartTime : %v \n", timeToStandard(time.Unix(v, 0).UTC()))
+		// fmt.Printf("EndTime : %v \n\n", timeToStandard(time.Unix(freeSlotMap[v], 0).UTC()))
+		StartTime := timeToStandard(time.Unix(v, 0).UTC())
+		EndTime := timeToStandard(time.Unix(freeSlotMap[v], 0).UTC())
+		result := Result{
+			StartTime: StartTime,
+			EndTime:   EndTime,
+		}
+		// p(startTime)
+		// p(endTime)
+		results = append(results, result)
 	}
+	r, err := json.Marshal(results)
+	failOnError(err, "Failed marshalling result to json")
+	p(string(r))
+
 }
 
 //ReadIn - reads the list of meeting schedule into memory from the given sourcefile.
 func (c *Calendar) ReadIn(sourcefile string) {
-	fmt.Printf("Attempting to read from: %v \n", sourcefile)
 
 	meetingsData, err := ioutil.ReadFile(sourcefile)
 	failOnError(err, "ioutil.ReadFile :"+sourcefile)
@@ -254,20 +250,19 @@ func (c *Calendar) ReadIn(sourcefile string) {
 	//append start daytime
 	startTimeU := StartDayTime.Unix()
 	mutex.Lock()
-	timeMap[startTimeU] = StartDayTime.Unix()
+	timeMap[startTimeU] = EndDayTime.Unix()
 	timeSlice = append(timeSlice, startTimeU)
 	mutex.Unlock()
 
 	sort.Slice(timeSlice, func(i, j int) bool { return timeSlice[i] < timeSlice[j] })
-
 }
 
 func loadMeetingsMap(m []Meetings, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 	for _, t := range m {
-		StU := timeToUnix(t.SartTime)
-		EtU := timeToUnix(t.EndTime)
+		StU := t.SartTime.Unix()
+		EtU := t.EndTime.Unix()
 
 		mutex.Lock()
 		timeMap[StU] = EtU
@@ -280,18 +275,3 @@ func timeToStandard(t time.Time) string {
 	st := t.Format(time.RFC3339)
 	return st
 }
-
-func timeToUnix(t time.Time) int64 {
-	return t.Unix()
-}
-
-//     today := time.Now()
-//     tomorrow := today.Add(24 * time.Hour)
-
-//     // Using time.Before() method
-//     g1 := today.Before(tomorrow)
-//     fmt.Println("today before tomorrow:", g1)
-
-//     // Using time.After() method
-//     g2 := tomorrow.After(today)
-//     fmt.Println("tomorrow after today:", g2)
