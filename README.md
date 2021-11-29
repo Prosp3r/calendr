@@ -19,7 +19,6 @@ e.g.
 This will display available/free slots of time in the calendar
 
 ```
-Free Slots:
 [
  {
   "startTime": "2021-03-08T00:00:00Z",

@@ -214,7 +214,7 @@ func main() {
 	}
 	r, err := json.MarshalIndent(results, "", " ")
 	failOnError(err, "Failed marshalling result to json")
-	fmt.Printf("\n\nFree Slots: \n%v\n", string(r))
+	fmt.Printf("\n%v\n", string(r))
 }
 
 //ReadIn - reads the list of meeting schedule into memory from the given sourcefile.
