@@ -23,7 +23,7 @@ type Meetings struct {
 
 type Result struct {
 	StartTime string `json:"startTime"`
-	EndTime   string `endTime:"endTime"`
+	EndTime   string `json:"endTime"`
 }
 
 func failOnError(err error, contex string) {
