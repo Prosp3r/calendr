@@ -188,13 +188,6 @@ func main() {
 
 	go flagg(ch)
 	if <-ch == true {
-		// fmt.Printf("Start Date Converted: %v\n\n", StartDayTime.UTC())
-		// fmt.Printf("Start Date ConvertedUnix: %v\n\n", StartDayTime.Unix())
-		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", time.Unix(StartDayTime.UTC().Unix(), 0).UTC())
-
-		// fmt.Printf("Start Date ConvertedfromUnix: %v\n\n", timeToStandard(time.Unix(StartDayTime.Unix(), 0)))
-		// fmt.Printf("Standard Start Date Converted: %v\n\n", timeToStandard(StartDayTime))
-		// fmt.Printf("Standard Start Date Converted: %v\n\n", timeToStandard(StartDayTime.UTC()))
 		c := new(Calendar)
 		c.ReadIn(Sourcefile)
 	}
@@ -219,7 +212,7 @@ func main() {
 		}
 		results = append(results, result)
 	}
-	r, err := json.Marshal(results)
+	r, err := json.MarshalIndent(results, "", " ")
 	failOnError(err, "Failed marshalling result to json")
 	fmt.Printf("\n\nFree Slots: \n%v\n", string(r))
 }
