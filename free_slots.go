@@ -95,7 +95,7 @@ func flagg(ch chan bool) {
 	}
 
 	if len(startdate) > 8 {
-		fmt.Printf("Start Date : %v\n\n", startdate)
+		fmt.Printf("Start Date : %v\n", startdate)
 		dateLayout := "2006-01-02"
 
 		StartDayTime, er = time.Parse(dateLayout, startdate)
@@ -114,7 +114,7 @@ func flagg(ch chan bool) {
 	}
 
 	if len(enddate) > 8 {
-		fmt.Printf("End Date : %v\n\n", enddate)
+		fmt.Printf("End Date : %v\n", enddate)
 		dateLayout := "2006-01-02"
 		EndDayTime, er = time.Parse(dateLayout, enddate)
 		if er != nil {
@@ -221,7 +221,7 @@ func main() {
 	}
 	r, err := json.Marshal(results)
 	failOnError(err, "Failed marshalling result to json")
-	fmt.Println(string(r))
+	fmt.Printf("\n\nFree Slots: \n%v\n", string(r))
 }
 
 //ReadIn - reads the list of meeting schedule into memory from the given sourcefile.
