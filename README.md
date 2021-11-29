@@ -1,6 +1,6 @@
 # Calendr
 
-### A simple calendar time slot search
+### A simple commandline calendar time slot search
 
 ### Usage
 
@@ -18,3 +18,32 @@ e.g.
 
 This will display available/free slots of time in the calendar
 
+```
+Free Slots:
+[
+ {
+  "startTime": "2021-03-08T00:00:00Z",
+  "endTime": "2021-03-10T08:15:31Z"
+ },
+ {
+  "startTime": "2021-03-10T10:15:13Z",
+  "endTime": "2021-03-10T11:55:31Z"
+ },
+ {
+  "startTime": "2021-03-10T12:15:19Z",
+  "endTime": "2021-03-11T10:15:45Z"
+ },
+ {
+  "startTime": "2021-03-11T10:55:28Z",
+  "endTime": "2021-03-11T11:15:51Z"
+ },
+ {
+  "startTime": "2021-03-11T12:55:14Z",
+  "endTime": "2021-03-12T00:00:00Z"
+ }
+]
+```
+
+
+SIDE NOTE: 
+- Time Zone is default to UTC for consistency.
